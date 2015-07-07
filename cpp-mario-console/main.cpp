@@ -291,19 +291,7 @@ void UpdateUnit(UnitData* unit, float deltaTime)
     }
 
     //X ORDERS
-    //unit->xSpeed = GetUnitSpeedX(unit->type) * unit->xOrder;
-    if (unit->xOrder == UnitOrder_Backward)
-    {
-        unit->xSpeed = -GetUnitSpeedX(unit->type);
-    }
-    else if (unit->xOrder == UnitOrder_Forward)
-    {
-        unit->xSpeed = GetUnitSpeedX(unit->type);
-    }
-    else
-    {
-        unit->xSpeed = 0;
-    }
+    unit->xSpeed = GetUnitSpeedX(unit->type) * unit->xOrder;
 
     float deltaX = unit->xSpeed * deltaTime;
     float deltaY = unit->ySpeed * deltaTime;
@@ -397,7 +385,7 @@ void UpdateAI()
                 unitsData[u].xOrder = UnitOrder_Forward;
             }
         }
-        else if (unitsData[u].xOrder = UnitOrder_Backward)
+        else if (unitsData[u].xOrder == UnitOrder_Backward)
         {
             unsigned char cellLeft = levelData[row][col - 1];
             UnitType type = GetUnitTypeFromCell(cellLeft);
@@ -407,7 +395,7 @@ void UpdateAI()
                 unitsData[u].xOrder = UnitOrder_Forward;
             }
         }
-        else if(unitsData[u].xOrder = UnitOrder_Forward)
+        else if(unitsData[u].xOrder == UnitOrder_Forward)
         {
             unsigned char cellRight = levelData[row][col + 1];
             UnitType type = GetUnitTypeFromCell(cellRight);
