@@ -20,6 +20,7 @@ void Shutdown();
 
 ////////////////////////////////////
 //CONSTANTS
+const int maxLevels = 3;
 const int maxUnitsCount = 35;
 const float cellBeginValue = 0.001f;
 const float cellEndValue = 0.999f;
@@ -38,6 +39,9 @@ unsigned char levelData[LEVEL_ROWS][LEVEL_COLS];
 UnitData unitsData[maxUnitsCount];
 int unitsCount = 0;
 int heroIndex = 0;
+
+//saved data
+UnitData* savedHero;
 
 void main()
 {
@@ -77,6 +81,11 @@ void Initialize()
             case 0:
                 symbol = levelData0[r][c];
                 break;
+            case 1:
+                symbol = levelData1[r][c];
+                break;
+            case 2:
+                symbol = levelData2[r][c];
             }
 
             levelData[r][c] = symbol;
@@ -100,6 +109,10 @@ void Initialize()
                 break;
             }
         }
+    }
+    if (savedHero != 0)
+    {
+        unitsData[heroIndex].health = savedHero->health;
     }
 }
 
@@ -205,7 +218,19 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
         switch (destinationSymbol)
         {
         case CellSymbol_Exit:
-            isGameActive = false;
+            if (currentLevel < maxLevels) {
+                currentLevel++;
+                //save data
+                UnitData hd;
+                savedHero = &hd;
+                savedHero->health = unit->health;
+
+                Initialize();
+            }
+            else
+            {
+                isGameActive = false;
+            }
             break;
         case CellSymbol_Crystal:
             canMove = true;
@@ -233,6 +258,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                     unit->ySpeed = -GetUnitJumpSpeed(unit->type);
                 }
             }
+            break;
         }
     }
     else { //monsters actions
@@ -461,5 +487,6 @@ void Update()
 
 void Shutdown()
 {
-
+    RenderSystemDrawText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "Game over...", ConsoleColor_Red, ConsoleColor_Blue);
+    _getch();
 }

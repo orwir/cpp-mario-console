@@ -7,20 +7,20 @@ const int LEVEL_ROWS = SCREEN_HEIGHT;
 
 const int GRAVITY_SPEED = 38;
 
-const unsigned char CellSymbol_Empty = ' ';
-const unsigned char CellSymbol_BrickWall = '#';
-const unsigned char CellSymbol_SteelWall = '@';
-const unsigned char CellSymbol_Abyss = 'a';
-const unsigned char CellSymbol_Pipe = 'p';
-const unsigned char CellSymbol_Crystal = '0';
-const unsigned char CellSymbol_Box = '?';
-const unsigned char CellSymbol_OpenedBox = '&';
-const unsigned char CellSymbol_Mushroom = '^';
+const unsigned char CellSymbol_Empty       = ' ';
+const unsigned char CellSymbol_BrickWall   = '#';
+const unsigned char CellSymbol_SteelWall   = '@';
+const unsigned char CellSymbol_Abyss       = 'a';
+const unsigned char CellSymbol_Pipe        = 'p';
+const unsigned char CellSymbol_Crystal     = '0';
+const unsigned char CellSymbol_Box         = '?';
+const unsigned char CellSymbol_OpenedBox   = '&';
+const unsigned char CellSymbol_Mushroom    = '^';
 const unsigned char CellSymbol_MushroomBox = '!';
-const unsigned char CellSymbol_Hero = 'h';
-const unsigned char CellSymbol_Goomba = 'g';
-const unsigned char CellSymbol_Exit = '|';
-const unsigned char CellSymbol_Flag = '>';
+const unsigned char CellSymbol_Hero        = 'h';
+const unsigned char CellSymbol_Goomba      = 'g';
+const unsigned char CellSymbol_Exit        = '|';
+const unsigned char CellSymbol_Flag        = '>';
 
 const unsigned char levelData0[LEVEL_ROWS][LEVEL_COLS + 1] =
 {
@@ -33,7 +33,7 @@ const unsigned char levelData0[LEVEL_ROWS][LEVEL_COLS + 1] =
     "# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#",
     "#                                                                              #",
     "#                  0                                      0 0                  #",
-    "# @      #??#     ###            !                  ?### ######                #",
+    "#@@      #??#     ###            !                  ?### ######                #",
     "# @@                                                                           #",
     "# @@@                                                                          #",
     "# @@@@    ##      ######     ?   ?   ?    ?#        #             ##           #",
@@ -45,10 +45,68 @@ const unsigned char levelData0[LEVEL_ROWS][LEVEL_COLS + 1] =
     "#                                                                              #",
     "#                                               pppp                    #!#    #",
     "#           ?  #!#?#                pppp         pp       pppp          # #    #",
-    "#                        pppp        pp          pp        pp                  #",
+    "#                        pppp        pp     #    pp        pp                  #",
     "#  h            g         pp         pp g        pp     g gpp        #   g     #",
     "# #################################################################  ###########",
     "#a#################################################################aa###########"
+};
+
+const unsigned char levelData1[LEVEL_ROWS][LEVEL_COLS + 1] =
+{
+    "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    "#        0                                                                     #",
+    "#                                                                              #",
+    "#                              !##?#                                @          #",
+    "#   @@@      @      pppp                           pppp            @@@         #",
+    "#  @@@@ g    @@      pp    g         g g   # #      pp  g     g   @@@@@      h #",
+    "# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##",
+    "#                                       @      @                            #  #",
+    "#                  0                    @ g  g @          0 0              0#  #",
+    "# @      #??#     ###            !      @@@@@@@@    ?### ######          ## #  #",
+    "# @                                                             #       #  g g #",
+    "# @ @                #                                                  ########",
+    "# @ @     ##      ######     ?   ?   ?    ?#        #             #####        #",
+    "# @ @ @                                                                        #",
+    "# @ @ @@    g   g     #   g g             g     #   g   #   g            #     #",
+    "# @a@a@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#@@@@@@@@@@@@@@@@@@@@@##@    #",
+    "# #                                                                       #    #",
+    "# #              ?                                                        #    #",
+    "# #                                                                       #    #",
+    "# #   |>                                        pppp                    #!#    #",
+    "# #   |     ?  #?#?#                pppp         pp       pppp         ## #    #",
+    "# #   |                  pppp        pp          pp        pp                  #",
+    "# #   |         g         pp         pp g        pp     g gpp        #   g     #",
+    "# #################################################################  ###########",
+    "#a#################################################################aa###########"
+};
+
+const unsigned char levelData2[LEVEL_ROWS][LEVEL_COLS + 1] =
+{
+    "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    "#        0   0  ?                                                  #           #",
+    "#     #      g               #                      ?#         ### #    ??     #",
+    "#    @@@@@@@@@@@@@@@@@@@@@@@@@  #??#     0 0 0                #    #           #",
+    "#     @                      @                     pppp      #  ####   ????    #",
+    "#  @@   g   @@@      g  #    @       g g            pp      #    g     g     # #",
+    "# @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ #",
+    "# @                         #                             0 0                  #",
+    "# @                !       #        #    g      g #                        #####",
+    "# @      #??#      ##     #   ######################?##########  g     g  #    #",
+    "# @                      #    #                                ###########     #",
+    "# @               # g   #    #                    #                            #",
+    "# @       ##      ######## ###   ?   ?    ?#        #             ##           #",
+    "# @   @        #      #        #                                               #",
+    "# @ h @@   g       g  # g g g g           g               g g            #     #",
+    "#a@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##@    #",
+    "#                                                                              #",
+    "#                ?                                                           ###",
+    "#                                                                              #",
+    "#  |>                                           pppp                    #!#    #",
+    "#  |    #   ?  #!#?#                pppp         pp       pppp          # #    #",
+    "#  |                     pppp        pp          pp        pp                  #",
+    "#  |            g         pp         pp g        pp     g gpp        #   g     #",
+    "# ##############################  #################################  ###########",
+    "#a##############################aa#################################aa###########"
 };
 
 unsigned char GetRenderSymbol(unsigned char symbol)
