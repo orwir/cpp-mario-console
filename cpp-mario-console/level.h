@@ -173,3 +173,15 @@ ConsoleColor GetRenderHeroColor(int heroHealth)
     }
     return ConsoleColor_Yellow;
 }
+
+int GetScoreForSymbol(unsigned char symbol)
+{
+    switch (symbol)
+    {
+    case CellSymbol_Box:      return 2;
+    case CellSymbol_Crystal:  return 10;
+    case CellSymbol_Mushroom: return 13;
+    case CellSymbol_Goomba:   return 18;
+    }
+    return 0;
+}

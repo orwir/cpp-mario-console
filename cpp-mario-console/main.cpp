@@ -40,8 +40,9 @@ UnitData unitsData[maxUnitsCount];
 int unitsCount = 0;
 int heroIndex = 0;
 
-//saved data
-UnitData* savedHero;
+//Hero data
+int prevLevelHeroHealth = 1;
+int score = 0;
 
 void main()
 {
@@ -110,10 +111,8 @@ void Initialize()
             }
         }
     }
-    if (savedHero != 0)
-    {
-        unitsData[heroIndex].health = savedHero->health;
-    }
+    unitsData[heroIndex].health = prevLevelHeroHealth;
+    prevLevelHeroHealth = 1;
 }
 
 void Render()
@@ -141,6 +140,8 @@ void Render()
     char textBuffer[32];
     sprintf_s(textBuffer, "FPS: %d", fps);
     RenderSystemDrawText(0, 0, textBuffer, ConsoleColor_DarkGrey, GetRenderSymbolColor(CellSymbol_SteelWall));
+    int lenght = sprintf_s(textBuffer, "Your score: %04d", score);
+    RenderSystemDrawText(SCREEN_WIDTH - lenght, 0, textBuffer, ConsoleColor_DarkGrey, GetRenderSymbolColor(CellSymbol_SteelWall));
 
     RenderSystemFlush();
 }
@@ -218,12 +219,10 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
         switch (destinationSymbol)
         {
         case CellSymbol_Exit:
+            currentLevel++;
             if (currentLevel < maxLevels) {
-                currentLevel++;
                 //save data
-                UnitData hd;
-                savedHero = &hd;
-                savedHero->health = unit->health;
+                prevLevelHeroHealth = unit->health;
 
                 Initialize();
             }
@@ -234,17 +233,20 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
             break;
         case CellSymbol_Crystal:
             canMove = true;
+            score += GetScoreForSymbol(destinationSymbol);
             break;
         case CellSymbol_Mushroom:
             canMove = true;
-            if (unit->health < 2)
+            if (unit->health != 2)
             {
                 unit->health = 2;
+                score += GetScoreForSymbol(destinationSymbol);
             }
             break;
         case CellSymbol_BrickWall:
             if (directionRow < 0 && unit->health > 1)
             {
+                score += GetScoreForSymbol(destinationSymbol);
                 levelData[newRow][newCol] = CellSymbol_Empty;
             }
             break;
@@ -256,6 +258,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                 {
                     KillUnit(goomba);
                     unit->ySpeed = -GetUnitJumpSpeed(unit->type);
+                    score += GetScoreForSymbol(destinationSymbol);
                 }
             }
             break;
@@ -488,5 +491,4 @@ void Update()
 void Shutdown()
 {
     RenderSystemDrawText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "Game over...", ConsoleColor_Red, ConsoleColor_Blue);
-    _getch();
 }
