@@ -21,7 +21,10 @@ const unsigned char CellSymbol_Hero        = 'h';
 const unsigned char CellSymbol_Goomba      = 'g';
 const unsigned char CellSymbol_Exit        = '|';
 const unsigned char CellSymbol_Flag        = '>';
-const unsigned char CellSymbol_Spring      = 'j';
+const unsigned char CellSymbol_Spring      = 's';
+const unsigned char CellSymbol_Koopa       = 'k';
+const unsigned char CellSymbol_TurnedKoopa = 't';
+const unsigned char CellSymbol_JumpedKoopa = 'j';
 
 const unsigned char levelData0[LEVEL_ROWS][LEVEL_COLS + 1] =
 {
@@ -39,16 +42,16 @@ const unsigned char levelData0[LEVEL_ROWS][LEVEL_COLS + 1] =
     "# @@@                                                                          #",
     "# @@@@    ##      ######     ?   ?   ?    ?#        #             ##           #",
     "# @@@@@                                                                        #",
-    "# @@@@@@              # g g g g           g               g g            #     #",
+    "# @@@@@@              # g g g g           k               g g            #     #",
     "# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##@    #",
     "#                                                                              #",
     "#                ?                                                           ###",
     "#                                                                              #",
     "#                                               pppp                    #!#    #",
     "#           ?  #!#?#                pppp         pp       pppp          # #    #",
-    "#                        pppp        pp          pp        pp                  #",
-    "#  h            g         pp         pp g        pp     g gpp        #   g     #",
-    "# ##########################################j######################  ###########",
+    "#                        pppp        pp       #  pp        pp                  #",
+    "#  h            g         pp    j    pp g        pp     g gpp        #   g     #",
+    "# ##########################################s######################  ###########",
     "#a#################################################################aa###########"
 };
 
@@ -59,8 +62,8 @@ const unsigned char levelData1[LEVEL_ROWS][LEVEL_COLS + 1] =
     "#                                                                              #",
     "#                              !##?#                                @          #",
     "#   @@@      @      pppp                           pppp            @@@         #",
-    "#  @@@@ g    @@      pp    g         g g   # #      pp  g     g   @@@@@      h #",
-    "# @@@@@@@@@@@@@@@@@@@@@@@@j@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##",
+    "#  @@@@ g    @@      pp    g         g g   # #      pp  g     j   @@@@@      h #",
+    "# @@@@@@@@@@@@@@@@@@@@@@@@s@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##",
     "#                                       @      @                            #  #",
     "#                  0                    @ g  g @          0 0              0#  #",
     "# @      #??#     ###            !      @@@@@@@@    ?### ######          ## #  #",
@@ -68,11 +71,11 @@ const unsigned char levelData1[LEVEL_ROWS][LEVEL_COLS + 1] =
     "# @ @                #                                                  ########",
     "# @ @     ##      ######     ?   ?   ?    ?#        #             #####        #",
     "# @ @ @                                                                        #",
-    "# @ @ @@    g   g     #   g g             g     #   g   #   g            #     #",
+    "# @ @ @@    g   g     #   g g             k     #   g   #   g            #     #",
     "# @a@a@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#@@@@@@@@@@@@@@@@@@@@@##@    #",
     "# #                                                                       #    #",
     "# #              ?                                                        #    #",
-    "# #                                                                       #    #",
+    "# #                                              j                        #    #",
     "# #   |>                                        pppp                    #!#    #",
     "# #   |     ?  #?#?#                pppp         pp       pppp         ## #    #",
     "# #   |                  pppp        pp          pp        pp                  #",
@@ -91,13 +94,13 @@ const unsigned char levelData2[LEVEL_ROWS][LEVEL_COLS + 1] =
     "#  @@   g   @@@      g  #    @       g g            pp      #    g     g     # #",
     "# @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ #",
     "# @                         #                             0 0                  #",
-    "# @                !       #        #    g      g #                        #####",
+    "# @                !       #        #    j      g #                        #####",
     "# @      #??#      ##     #   ######################?##########  g     g  #    #",
     "# @                      #    #                                ###########     #",
     "# @               # g   #    #                    #                            #",
     "# @       ##      ######## ###   ?   ?    ?#        #             ##           #",
     "# @   @        #      #        #                                               #",
-    "# @ h @@   g       g  # g g g g           g               g g            #     #",
+    "# @ h @@   g       g  # g g g g           k               g g            #     #",
     "#a@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##@    #",
     "#                                                                              #",
     "#                ?                                                           ###",
@@ -129,6 +132,9 @@ unsigned char GetRenderSymbol(unsigned char symbol)
     case CellSymbol_Exit:        return 222;
     case CellSymbol_Flag:        return 16;
     case CellSymbol_Spring:      return 24;
+    case CellSymbol_Koopa:       return 2;
+    case CellSymbol_TurnedKoopa: return 2;
+    case CellSymbol_JumpedKoopa: return 2;
     }
     return '?';
 }
@@ -150,6 +156,9 @@ ConsoleColor GetRenderSymbolColor(unsigned char symbol)
     case CellSymbol_Exit:        return ConsoleColor_Green;
     case CellSymbol_Flag:        return ConsoleColor_White;
     case CellSymbol_Spring:      return ConsoleColor_White;
+    case CellSymbol_Koopa:       return ConsoleColor_Green;
+    case CellSymbol_TurnedKoopa: return ConsoleColor_DarkGreen;
+    case CellSymbol_JumpedKoopa: return ConsoleColor_Green;
     }
     return ConsoleColor_Grey;
 }
@@ -181,10 +190,12 @@ int GetScoreForSymbol(unsigned char symbol)
 {
     switch (symbol)
     {
-    case CellSymbol_Box:      return 2;
-    case CellSymbol_Crystal:  return 10;
-    case CellSymbol_Mushroom: return 13;
-    case CellSymbol_Goomba:   return 18;
+    case CellSymbol_Box:         return 2;
+    case CellSymbol_Crystal:     return 10;
+    case CellSymbol_Mushroom:    return 13;
+    case CellSymbol_Goomba:      return 18;
+    case CellSymbol_Koopa:       return 20;
+    case CellSymbol_JumpedKoopa: return 23;
     }
     return 0;
 }

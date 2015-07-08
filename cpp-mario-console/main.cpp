@@ -65,6 +65,19 @@ void SetupSystem()
     currentLevel = 0;
 }
 
+void AddUnit(UnitType type, int row, int col)
+{
+    unitsData[unitsCount].type = type;
+    unitsData[unitsCount].x = float(col);
+    unitsData[unitsCount].y = float(row);
+    unitsData[unitsCount].health = 1;
+    unitsData[unitsCount].xSpeed = 0.0;
+    unitsData[unitsCount].ySpeed = 0.0;
+    unitsData[unitsCount].xOrder = UnitOrder_None;
+    unitsData[unitsCount].yOrder = UnitOrder_None;
+    unitsCount++;
+}
+
 void Initialize()
 {
     clockLastFrame = clock();
@@ -97,17 +110,11 @@ void Initialize()
                 heroIndex = unitsCount;
             case CellSymbol_Goomba:
             case CellSymbol_Mushroom:
+            case CellSymbol_Koopa:
+            case CellSymbol_TurnedKoopa:
+            case CellSymbol_JumpedKoopa:
                 UnitType unitType = GetUnitTypeFromCell(symbol);
-                unitsData[unitsCount].type = unitType;
-                unitsData[unitsCount].x = float(c);
-                unitsData[unitsCount].y = float(r);
-                unitsData[unitsCount].health = 1;
-                unitsData[unitsCount].xSpeed = 0.0;
-                unitsData[unitsCount].ySpeed = 0.0;
-                unitsData[unitsCount].xOrder = UnitOrder_None;
-                unitsData[unitsCount].yOrder = UnitOrder_None;
-                unitsCount++;
-
+                AddUnit(unitType, r, c);
                 break;
             }
         }
@@ -169,7 +176,14 @@ void KillUnit(UnitData* unit)
     unit->health = 0;
     int col = int(unit->x);
     int row = int(unit->y);
-    levelData[row][col] = CellSymbol_Empty;
+    if (unit->type == UnitType_Koopa || unit->type == UnitType_JumpedKoopa)
+    {
+        levelData[row][col] = CellSymbol_TurnedKoopa;
+        AddUnit(UnitType_TurnedKoopa, row, col);
+    }
+    else {
+        levelData[row][col] = CellSymbol_Empty;
+    }
 }
 
 bool MoveUnitTo(UnitData* unit, float newX, float newY)
@@ -236,16 +250,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
             {
                 levelData[newRow - 1][newCol] = CellSymbol_Mushroom;
                 levelData[newRow][newCol] = CellSymbol_OpenedBox;
-                UnitType unitType = GetUnitTypeFromCell(CellSymbol_Mushroom);
-                unitsData[unitsCount].type = unitType;
-                unitsData[unitsCount].x = float(newCol);
-                unitsData[unitsCount].y = float(newRow - 1);
-                unitsData[unitsCount].health = 1;
-                unitsData[unitsCount].xSpeed = 0.0;
-                unitsData[unitsCount].ySpeed = 0.0;
-                unitsData[unitsCount].xOrder = UnitOrder_None;
-                unitsData[unitsCount].yOrder = UnitOrder_None;
-                unitsCount++;
+                AddUnit(UnitType_Mushroom, newRow - 1, newCol);
             }
             break;
         case CellSymbol_Crystal:
@@ -275,17 +280,40 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
             }
             break;
         case CellSymbol_Goomba:
+        case CellSymbol_Koopa:
+        case CellSymbol_JumpedKoopa:
             if (directionRow > 0)
             {
-                UnitData* goomba = GetUnitAt(newCol, newRow);
-                if (goomba != 0)
+                UnitData* monster = GetUnitAt(newCol, newRow);
+                if (monster != 0)
                 {
                     score += GetScoreForSymbol(destinationSymbol);
-                    KillUnit(goomba);
+                    KillUnit(monster);
+                    unit->ySpeed = -GetUnitJumpSpeed(unit->type);
+                }
+            }
+            else
+            {
+                unitsData[heroIndex].health--;
+            }
+            break;
+        case CellSymbol_TurnedKoopa:
+        {
+            UnitData* turnedKoopa = GetUnitAt(newCol, newRow);
+            if (turnedKoopa != 0)
+            {
+                if (directionRow == 0)
+                {
+                    turnedKoopa->xOrder = (directionCol < 0) ? UnitOrder_Backward : UnitOrder_Forward;
+                }
+                else if (directionRow > 0)
+                {
+                    turnedKoopa->xOrder = UnitOrder_None;
                     unit->ySpeed = -GetUnitJumpSpeed(unit->type);
                 }
             }
             break;
+        }
         }
     }
     else
@@ -319,8 +347,14 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                 {
                     unit->xOrder = UnitOrder_Forward;
                 }
-                else {
+                else
+                {
                     unit->xOrder = UnitOrder_Backward;
+                }
+                if (unit->type == UnitType_TurnedKoopa && type != UnitType_TurnedKoopa)
+                {
+                    UnitData* metUnit = GetUnitAt(newCol, newRow);
+                    KillUnit(metUnit);
                 }
             }
             break;
@@ -452,7 +486,7 @@ void UpdateAI()
                     unitsData[u].xOrder = UnitOrder_Backward;
                 }
             }
-            else
+            else if(unitsData[u].type != UnitType_TurnedKoopa)
             {
                 if (levelData[row][col - 1] == CellSymbol_Empty)
                 {
@@ -483,6 +517,11 @@ void UpdateAI()
             {
                 unitsData[u].xOrder = UnitOrder_Backward;
             }
+        }
+
+        if (unitsData[u].type == UnitType_JumpedKoopa)
+        {
+            unitsData[u].yOrder = UnitOrder_Backward;
         }
     }
 }
