@@ -83,7 +83,7 @@ const unsigned char levelData1[LEVEL_ROWS][LEVEL_COLS + 1] =
 const unsigned char levelData2[LEVEL_ROWS][LEVEL_COLS + 1] =
 {
     "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",
-    "#        0   0  ?                                                  #           #",
+    "#        0   0  0                                                  #           #",
     "#     #      g               #                      ?#         ### #    ??     #",
     "#    @@@@@@@@@@@@@@@@@@@@@@@@@  #??#     0 0 0                #    #           #",
     "#     @                      @                     pppp      #  ####   ????    #",

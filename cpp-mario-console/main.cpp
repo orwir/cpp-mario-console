@@ -96,6 +96,7 @@ void Initialize()
             case CellSymbol_Hero:
                 heroIndex = unitsCount;
             case CellSymbol_Goomba:
+            case CellSymbol_Mushroom:
                 UnitType unitType = GetUnitTypeFromCell(symbol);
                 unitsData[unitsCount].type = unitType;
                 unitsData[unitsCount].x = float(c);
@@ -198,20 +199,6 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
     case CellSymbol_Abyss:
         KillUnit(unit);
         break;
-    case CellSymbol_Box:
-        if (directionRow < 0)
-        {
-            levelData[newRow - 1][newCol] = CellSymbol_Crystal;
-            levelData[newRow][newCol] = CellSymbol_OpenedBox;
-        }
-        break;
-    case CellSymbol_MushroomBox:
-        if (directionRow < 0)
-        {
-            levelData[newRow - 1][newCol] = CellSymbol_Mushroom;
-            levelData[newRow][newCol] = CellSymbol_OpenedBox;
-        }
-        break;
     }
 
     if (unit->type == UnitType_Hero) //hero actions
@@ -231,18 +218,49 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                 isGameActive = false;
             }
             break;
+        case CellSymbol_Box:
+            if (directionRow < 0)
+            {
+                levelData[newRow - 1][newCol] = CellSymbol_Crystal;
+                levelData[newRow][newCol] = CellSymbol_OpenedBox;
+            }
+            break;
+        case CellSymbol_MushroomBox:
+            if (directionRow < 0)
+            {
+                levelData[newRow - 1][newCol] = CellSymbol_Mushroom;
+                levelData[newRow][newCol] = CellSymbol_OpenedBox;
+                UnitType unitType = GetUnitTypeFromCell(CellSymbol_Mushroom);
+                unitsData[unitsCount].type = unitType;
+                unitsData[unitsCount].x = float(newCol);
+                unitsData[unitsCount].y = float(newRow - 1);
+                unitsData[unitsCount].health = 1;
+                unitsData[unitsCount].xSpeed = 0.0;
+                unitsData[unitsCount].ySpeed = 0.0;
+                unitsData[unitsCount].xOrder = UnitOrder_None;
+                unitsData[unitsCount].yOrder = UnitOrder_None;
+                unitsCount++;
+            }
+            break;
         case CellSymbol_Crystal:
             canMove = true;
             score += GetScoreForSymbol(destinationSymbol);
             break;
         case CellSymbol_Mushroom:
+        {
             canMove = true;
-            if (unit->health != 2)
+            UnitData* mushroom = GetUnitAt(newCol, newRow);
+            if (mushroom != 0)
             {
-                unit->health = 2;
                 score += GetScoreForSymbol(destinationSymbol);
+                KillUnit(mushroom);
+                if (unit->health != 2)
+                {
+                    unit->health = 2;
+                }
             }
             break;
+        }
         case CellSymbol_BrickWall:
             if (directionRow < 0 && unit->health > 1)
             {
@@ -256,25 +274,36 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                 UnitData* goomba = GetUnitAt(newCol, newRow);
                 if (goomba != 0)
                 {
+                    score += GetScoreForSymbol(destinationSymbol);
                     KillUnit(goomba);
                     unit->ySpeed = -GetUnitJumpSpeed(unit->type);
-                    score += GetScoreForSymbol(destinationSymbol);
                 }
             }
             break;
         }
     }
-    else { //monsters actions
+    else
+    { //monsters actions
         switch (destinationSymbol)
         {
         case CellSymbol_Hero:
-            unitsData[heroIndex].health--;
-            if (unit->xOrder == UnitOrder_Backward)
-            {
-                unit->xOrder = UnitOrder_Forward;
+            if (unit->type == UnitType_Mushroom) {
+                score += GetScoreForSymbol(levelData[oldRow][oldCol]);
+                KillUnit(unit);
+                if (unitsData[heroIndex].health != 2)
+                {
+                    unitsData[heroIndex].health = 2;
+                }
             }
             else {
-                unit->xOrder = UnitOrder_Backward;
+                unitsData[heroIndex].health--;
+                if (unit->xOrder == UnitOrder_Backward)
+                {
+                    unit->xOrder = UnitOrder_Forward;
+                }
+                else {
+                    unit->xOrder = UnitOrder_Backward;
+                }
             }
             break;
         default:
@@ -405,13 +434,27 @@ void UpdateAI()
 
         if (unitsData[u].xOrder == UnitOrder_None)
         {
-            if (levelData[row][col - 1] == CellSymbol_Empty)
+            if (unitsData[u].type == UnitType_Mushroom)
             {
-                unitsData[u].xOrder = UnitOrder_Backward;
+                if (levelData[row][col + 1] == CellSymbol_Empty)
+                {
+                    unitsData[u].xOrder = UnitOrder_Forward;
+                }
+                else
+                {
+                    unitsData[u].xOrder = UnitOrder_Backward;
+                }
             }
             else
             {
-                unitsData[u].xOrder = UnitOrder_Forward;
+                if (levelData[row][col - 1] == CellSymbol_Empty)
+                {
+                    unitsData[u].xOrder = UnitOrder_Backward;
+                }
+                else
+                {
+                    unitsData[u].xOrder = UnitOrder_Forward;
+                }
             }
         }
         else if (unitsData[u].xOrder == UnitOrder_Backward)
