@@ -17,7 +17,8 @@ UnitType GetUnitTypeFromCell(unsigned char symbol)
 {
     switch (symbol)
     {
-    case CellSymbol_Hero:        return UnitType_Hero;
+    case CellSymbol_Mario:       return UnitType_Hero;
+    case CellSymbol_Luigi:       return UnitType_Hero;
     case CellSymbol_Goomba:      return UnitType_Goomba;
     case CellSymbol_Mushroom:    return UnitType_Mushroom;
     case CellSymbol_Koopa:       return UnitType_Koopa;

@@ -38,11 +38,8 @@ unsigned char levelData[LEVEL_ROWS][LEVEL_COLS];
 
 UnitData unitsData[maxUnitsCount];
 int unitsCount = 0;
-int heroIndex = 0;
-
-//Hero data
-int prevLevelHeroHealth = 1;
-int score = 0;
+Player mario;
+Player luigi;
 
 void main()
 {
@@ -63,6 +60,8 @@ void SetupSystem()
     srand(time(0));
     RenderSystemInitialize();
     currentLevel = 0;
+    mario.score = 0;
+    luigi.score = 0;
 }
 
 void AddUnit(UnitType type, int row, int col)
@@ -83,7 +82,8 @@ void Initialize()
     clockLastFrame = clock();
 
     unitsCount = 0;
-    heroIndex = 0;
+    mario.index = 0;
+    luigi.index = 0;
 
     for (int r = 0; r < LEVEL_ROWS; r++)
     {
@@ -106,8 +106,16 @@ void Initialize()
 
             switch (symbol)
             {
-            case CellSymbol_Hero:
-                heroIndex = unitsCount;
+            case CellSymbol_Mario:
+            case CellSymbol_Luigi:
+                if (symbol == CellSymbol_Mario)
+                {
+                    mario.index = unitsCount;
+                }
+                else
+                {
+                    luigi.index = unitsCount;
+                }
             case CellSymbol_Goomba:
             case CellSymbol_Mushroom:
             case CellSymbol_Koopa:
@@ -119,8 +127,6 @@ void Initialize()
             }
         }
     }
-    unitsData[heroIndex].health = prevLevelHeroHealth;
-    prevLevelHeroHealth = 1;
 }
 
 void Render()
@@ -136,9 +142,13 @@ void Render()
             ConsoleColor symbolColor = GetRenderSymbolColor(symbol);
             ConsoleColor backgroundColor = GetRenderSymbolBackgroundColor(symbol);
 
-            if (symbol == CellSymbol_Hero)
+            if (symbol == CellSymbol_Mario)
             {
-                symbolColor = GetRenderHeroColor(unitsData[heroIndex].health);
+                symbolColor = GetRenderHeroColor(unitsData[mario.index].health);
+            }
+            if (symbol == CellSymbol_Luigi)
+            {
+                symbolColor = GetRenderHeroColor(unitsData[luigi.index].health);
             }
 
             RenderSystemDrawChar(c, r, renderSymbol, symbolColor, backgroundColor);
@@ -148,7 +158,7 @@ void Render()
     char textBuffer[32];
     sprintf_s(textBuffer, "FPS: %d", fps);
     RenderSystemDrawText(0, 0, textBuffer, ConsoleColor_DarkGrey, GetRenderSymbolColor(CellSymbol_SteelWall));
-    int lenght = sprintf_s(textBuffer, "Your score: %04d", score);
+    int lenght = sprintf_s(textBuffer, "Mario: %04d   Luigi: %04d", mario.score, luigi.score);
     RenderSystemDrawText(SCREEN_WIDTH - lenght, 0, textBuffer, ConsoleColor_DarkGrey, GetRenderSymbolColor(CellSymbol_SteelWall));
 
     RenderSystemFlush();
@@ -223,14 +233,13 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
 
     if (unit->type == UnitType_Hero) //hero actions
     {
+        Player* player = (levelData[oldRow][oldCol] == CellSymbol_Mario) ? &mario : &luigi;
+
         switch (destinationSymbol)
         {
         case CellSymbol_Exit:
             currentLevel++;
             if (currentLevel < maxLevels) {
-                //save data
-                prevLevelHeroHealth = unit->health;
-
                 Initialize();
             }
             else
@@ -255,7 +264,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
             break;
         case CellSymbol_Crystal:
             canMove = true;
-            score += GetScoreForSymbol(destinationSymbol);
+            player->score += GetScoreForSymbol(destinationSymbol);
             break;
         case CellSymbol_Mushroom:
         {
@@ -263,7 +272,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
             UnitData* mushroom = GetUnitAt(newCol, newRow);
             if (mushroom != 0)
             {
-                score += GetScoreForSymbol(destinationSymbol);
+                player->score += GetScoreForSymbol(destinationSymbol);
                 KillUnit(mushroom);
                 if (unit->health != 2)
                 {
@@ -275,7 +284,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
         case CellSymbol_BrickWall:
             if (directionRow < 0 && unit->health > 1)
             {
-                score += GetScoreForSymbol(destinationSymbol);
+                player->score += GetScoreForSymbol(destinationSymbol);
                 levelData[newRow][newCol] = CellSymbol_Empty;
             }
             break;
@@ -287,14 +296,18 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                 UnitData* monster = GetUnitAt(newCol, newRow);
                 if (monster != 0)
                 {
-                    score += GetScoreForSymbol(destinationSymbol);
+                    player->score += GetScoreForSymbol(destinationSymbol);
                     KillUnit(monster);
                     unit->ySpeed = -GetUnitJumpSpeed(unit->type);
                 }
             }
             else
             {
-                unitsData[heroIndex].health--;
+                unitsData[player->index].health--;
+                if (unitsData[player->index].health <= 0)
+                {
+                    KillUnit(&unitsData[player->index]);
+                }
             }
             break;
         case CellSymbol_TurnedKoopa:
@@ -318,25 +331,32 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
     }
     else
     { //monsters actions
+        Player* player = (levelData[newRow][newCol] == CellSymbol_Mario) ? &mario : &luigi;
+        
         switch (destinationSymbol)
         {
-        case CellSymbol_Hero:
+        case CellSymbol_Mario:
+        case CellSymbol_Luigi:
             if (unit->type == UnitType_Mushroom) {
-                score += GetScoreForSymbol(levelData[oldRow][oldCol]);
+                player->score += GetScoreForSymbol(levelData[oldRow][oldCol]);
                 KillUnit(unit);
-                if (unitsData[heroIndex].health != 2)
+                if (unitsData[player->index].health != 2)
                 {
-                    unitsData[heroIndex].health = 2;
+                    unitsData[player->index].health = 2;
                 }
             }
             else {
-                unitsData[heroIndex].health--;
+                unitsData[player->index].health--;
                 if (unit->xOrder == UnitOrder_Backward)
                 {
                     unit->xOrder = UnitOrder_Forward;
                 }
                 else {
                     unit->xOrder = UnitOrder_Backward;
+                }
+                if (unitsData[player->index].health <= 0)
+                {
+                    KillUnit(&unitsData[player->index]);
                 }
             }
             break;
@@ -465,7 +485,7 @@ void UpdateAI()
 {
     for (int u = 0; u < unitsCount; u++)
     {
-        if (u == heroIndex || unitsData[u].health <= 0)
+        if (u == mario.index || u == luigi.index || unitsData[u].health <= 0)
         {
             continue;
         }
@@ -542,31 +562,60 @@ void Update()
         framesCounter = 0;
     }
 
+    //MARIO CONTROL
     if (isKeyDown(VK_UP))
     {
-        unitsData[heroIndex].yOrder = UnitOrder_Backward;
+        unitsData[mario.index].yOrder = UnitOrder_Backward;
     }
     else
     {
-        int row = int(unitsData[heroIndex].y);
-        int col = int(unitsData[heroIndex].x);
+        int row = int(unitsData[mario.index].y);
+        int col = int(unitsData[mario.index].x);
         if (levelData[row + 1][col] != CellSymbol_Spring)
         {
-            unitsData[heroIndex].yOrder = UnitOrder_None;
+            unitsData[mario.index].yOrder = UnitOrder_None;
         }
     }
 
     if (isKeyDown(VK_LEFT))
     {
-        unitsData[heroIndex].xOrder = UnitOrder_Backward;
+        unitsData[mario.index].xOrder = UnitOrder_Backward;
     }
     else if (isKeyDown(VK_RIGHT))
     {
-        unitsData[heroIndex].xOrder = UnitOrder_Forward;
+        unitsData[mario.index].xOrder = UnitOrder_Forward;
     }
     else
     {
-        unitsData[heroIndex].xOrder = UnitOrder_None;
+        unitsData[mario.index].xOrder = UnitOrder_None;
+    }
+
+    //LUIGI CONTROL
+    if (isKeyDown('W'))
+    {
+        unitsData[luigi.index].yOrder = UnitOrder_Backward;
+    }
+    else
+    {
+        int row = int(unitsData[luigi.index].y);
+        int col = int(unitsData[luigi.index].x);
+        if (levelData[row + 1][col] != CellSymbol_Spring)
+        {
+            unitsData[luigi.index].yOrder = UnitOrder_None;
+        }
+    }
+
+    if (isKeyDown('A'))
+    {
+        unitsData[luigi.index].xOrder = UnitOrder_Backward;
+    }
+    else if (isKeyDown('D'))
+    {
+        unitsData[luigi.index].xOrder = UnitOrder_Forward;
+    }
+    else
+    {
+        unitsData[luigi.index].xOrder = UnitOrder_None;
     }
 
     for (int u = 0; u < unitsCount; u++)
@@ -576,7 +625,7 @@ void Update()
 
     UpdateAI();
 
-    if (unitsData[heroIndex].health <= 0)
+    if (unitsData[mario.index].health <= 0 && unitsData[luigi.index].health <= 0)
     {
         Initialize();
     }

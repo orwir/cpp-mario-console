@@ -17,7 +17,8 @@ const unsigned char CellSymbol_Box         = '?';
 const unsigned char CellSymbol_OpenedBox   = '&';
 const unsigned char CellSymbol_Mushroom    = '^';
 const unsigned char CellSymbol_MushroomBox = '!';
-const unsigned char CellSymbol_Hero        = 'h';
+const unsigned char CellSymbol_Mario       = 'M';
+const unsigned char CellSymbol_Luigi       = 'L';
 const unsigned char CellSymbol_Goomba      = 'g';
 const unsigned char CellSymbol_Exit        = '|';
 const unsigned char CellSymbol_Flag        = '>';
@@ -50,7 +51,7 @@ const unsigned char levelData0[LEVEL_ROWS][LEVEL_COLS + 1] =
     "#                                               pppp                    #!#    #",
     "#           ?  #!#?#                pppp         pp       pppp          # #    #",
     "#                        pppp        pp       #  pp        pp                  #",
-    "#  h            g         pp    j    pp g        pp     g gpp        #   g     #",
+    "#  LM           g         pp    j    pp g        pp     g gpp        #   g     #",
     "# ##########################################s######################  ###########",
     "#a#################################################################aa###########"
 };
@@ -62,7 +63,7 @@ const unsigned char levelData1[LEVEL_ROWS][LEVEL_COLS + 1] =
     "#                                                                              #",
     "#                              !##?#                                @          #",
     "#   @@@      @      pppp                           pppp            @@@         #",
-    "#  @@@@ g    @@      pp    g         g g   # #      pp  g     j   @@@@@      h #",
+    "#  @@@@ g    @@      pp    g         g g   # #      pp  g     j   @@@@@     ML #",
     "# @@@@@@@@@@@@@@@@@@@@@@@@s@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##",
     "#                                       @      @                            #  #",
     "#                  0                    @ g  g @          0 0              0#  #",
@@ -96,11 +97,11 @@ const unsigned char levelData2[LEVEL_ROWS][LEVEL_COLS + 1] =
     "# @                         #                             0 0                  #",
     "# @                !       #        #    j      g #                        #####",
     "# @      #??#      ##     #   ######################?##########  g     g  #    #",
-    "# @                      #    #                                ###########     #",
-    "# @               # g   #    #                    #                            #",
+    "# @L                     #    #                                ###########     #",
+    "# @@              # g   #    #                    #                            #",
     "# @       ##      ######## ###   ?   ?    ?#        #             ##           #",
     "# @   @        #      #        #                                               #",
-    "# @ h @@   g       g  # g g g g           k               g g            #     #",
+    "# @ M @@   g       g  # g g g g           k               g g            #     #",
     "#a@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@##@    #",
     "#                                                                              #",
     "#                ?                                                           ###",
@@ -127,7 +128,8 @@ unsigned char GetRenderSymbol(unsigned char symbol)
     case CellSymbol_OpenedBox:   return 254;
     case CellSymbol_Mushroom:    return 6;
     case CellSymbol_MushroomBox: return '?';
-    case CellSymbol_Hero:        return 2;
+    case CellSymbol_Mario:       return 2;
+    case CellSymbol_Luigi:       return 1;
     case CellSymbol_Goomba:      return 2;
     case CellSymbol_Exit:        return 222;
     case CellSymbol_Flag:        return 16;
@@ -151,7 +153,8 @@ ConsoleColor GetRenderSymbolColor(unsigned char symbol)
     case CellSymbol_OpenedBox:   return ConsoleColor_Grey;
     case CellSymbol_Mushroom:    return ConsoleColor_Red;
     case CellSymbol_MushroomBox: return ConsoleColor_DarkRed;
-    case CellSymbol_Hero:        return ConsoleColor_Yellow;
+    case CellSymbol_Mario:       return ConsoleColor_Yellow;
+    case CellSymbol_Luigi:       return ConsoleColor_Yellow;
     case CellSymbol_Goomba:      return ConsoleColor_DarkRed;
     case CellSymbol_Exit:        return ConsoleColor_Green;
     case CellSymbol_Flag:        return ConsoleColor_White;

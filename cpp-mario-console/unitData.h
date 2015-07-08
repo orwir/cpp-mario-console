@@ -17,3 +17,9 @@ struct UnitData
     UnitOrder xOrder;
     UnitOrder yOrder;
 };
+
+struct Player
+{
+    int index;
+    int score;
+};
