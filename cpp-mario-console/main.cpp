@@ -201,6 +201,12 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
         break;
     }
 
+    unsigned char floor = levelData[newRow + 1][newCol];
+    if (floor == CellSymbol_Spring)
+    {
+        unit->yOrder = UnitOrder_Backward;
+    }
+
     if (unit->type == UnitType_Hero) //hero actions
     {
         switch (destinationSymbol)
@@ -345,6 +351,7 @@ void UpdateUnit(UnitData* unit, float deltaTime)
         && levelData[row + 1][col] != CellSymbol_Abyss)
         {
             unit->ySpeed = -GetUnitJumpSpeed(unit->type);
+            unit->yOrder = UnitOrder_None;
         }
     }
 
@@ -502,7 +509,12 @@ void Update()
     }
     else
     {
-        unitsData[heroIndex].yOrder = UnitOrder_None;
+        int row = int(unitsData[heroIndex].y);
+        int col = int(unitsData[heroIndex].x);
+        if (levelData[row + 1][col] != CellSymbol_Spring)
+        {
+            unitsData[heroIndex].yOrder = UnitOrder_None;
+        }
     }
 
     if (isKeyDown(VK_LEFT))

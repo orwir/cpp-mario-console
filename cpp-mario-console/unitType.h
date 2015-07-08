@@ -38,5 +38,5 @@ int GetUnitJumpSpeed(UnitType unit)
     {
     case UnitType_Hero: return 17;
     }
-    return 0;
+    return 14;
 }
