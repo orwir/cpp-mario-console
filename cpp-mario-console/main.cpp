@@ -129,6 +129,17 @@ void Initialize()
     }
 }
 
+bool IsCellVisible(int row, int col)
+{
+    float mr = unitsData[mario.index].y;
+    float mc = unitsData[mario.index].x;
+    float lr = unitsData[luigi.index].y;
+    float lc = unitsData[luigi.index].x;
+
+    return (sqrt(pow(mr-row, 2)*2 + pow(mc-col, 2)) < 15 && unitsData[mario.index].health > 0)
+        || (sqrt(pow(lr-row, 2)*2 + pow(lc-col, 2)) < 15 && unitsData[luigi.index].health > 0);
+}
+
 void Render()
 {
     RenderSystemClear();
@@ -151,7 +162,14 @@ void Render()
                 symbolColor = GetRenderHeroColor(unitsData[luigi.index].health);
             }
 
-            RenderSystemDrawChar(c, r, renderSymbol, symbolColor, backgroundColor);
+            if (IsCellVisible(r, c))
+            {
+                RenderSystemDrawChar(c, r, renderSymbol, symbolColor, backgroundColor);
+            }
+            else
+            {
+                RenderSystemDrawChar(c, r, '#', ConsoleColor_DarkGrey, ConsoleColor_DarkGrey);
+            }
         }
     }
 
@@ -301,7 +319,7 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                     unit->ySpeed = -GetUnitJumpSpeed(unit->type);
                 }
             }
-            else
+            else if(directionRow == 0)
             {
                 unitsData[player->index].health--;
                 if (unitsData[player->index].health <= 0)
@@ -345,7 +363,8 @@ bool MoveUnitTo(UnitData* unit, float newX, float newY)
                     unitsData[player->index].health = 2;
                 }
             }
-            else {
+            else if(directionRow > 0 || directionCol != 0)
+            {
                 unitsData[player->index].health--;
                 if (unit->xOrder == UnitOrder_Backward)
                 {
@@ -625,7 +644,7 @@ void Update()
 
     UpdateAI();
 
-    if (unitsData[mario.index].health <= 0 && unitsData[luigi.index].health <= 0)
+    if (unitsData[mario.index].health <= 0 && unitsData[luigi.index].health <= 0 || isKeyDown('R'))
     {
         Initialize();
     }
